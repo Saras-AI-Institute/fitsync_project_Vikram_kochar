@@ -1,4 +1,8 @@
+import pandas as pd
+
 def calculate_recovery_score(df: pd.DataFrame) -> pd.DataFrame:
+
+
     """
     Calculate and add a recovery score to the dataframe.
 
