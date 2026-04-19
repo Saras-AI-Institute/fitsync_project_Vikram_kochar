@@ -1,43 +1,34 @@
-import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
+import pandas as pd
+from datetime import timedelta, date
+import random
 
+# Function to generate date range
+def daterange(date1, date2):
+    for n in range(int ((date2 - date1).days) + 1):
+        yield date1 + timedelta(n)
 
-np.random.seed(42)
+# Generate dates for the year 2025
+dates = list(daterange(date(2025, 1, 1), date(2025, 12, 31)))
 
-# Constants
-NUM_DAYS = 365
-START_DATE = datetime(2025, 1, 1)
-
-# Generate date range
-
-dates = [START_DATE + timedelta(days=i) for i in range(NUM_DAYS)]
-
-
-
-# Generate realistic data
-steps = np.random.normal(loc=8500, scale=1000, size=NUM_DAYS).clip(3000, 18000)
-sleep_hours = np.random.normal(loc=7.2, scale=1, size=NUM_DAYS).clip(4.2, 9.5)
-heart_rate_bpm = np.random.normal(loc=68, scale=10, size=NUM_DAYS).clip(48, 110)
-calories_burnt = np.random.uniform(1800, 4200, NUM_DAYS)
-active_minutes = np.random.uniform(20, 180, NUM_DAYS)
-
-# Introduce 5% missing values
-for data in [steps, sleep_hours, heart_rate_bpm, calories_burnt, active_minutes]:
-    mask = np.random.rand(NUM_DAYS) < 0.05
-    data[mask] = np.nan
+# Generate synthetic data
+data = {
+    'Date': dates,
+    'Steps': np.random.normal(loc=8500, scale=2500, size=365).clip(3000, 18000),
+    'Sleep_Hours': np.random.normal(loc=7.2, scale=1, size=365).clip(4.5, 9.5),
+    'Heart_Rate_bpm': np.random.normal(loc=68, scale=10, size=365).clip(48, 110),
+    'Calories_Burned': np.random.uniform(1800, 4200, 365),
+    'Active_Minutes': np.random.uniform(20, 180, 365)
+}
 
 # Create DataFrame
-data = pd.DataFrame({
-    'date': dates,
-    'steps': steps,
-    'sleep_hours': sleep_hours,
-    'heart_rate_bpm': heart_rate_bpm,
-    'calories_burnt': calories_burnt,
-    'active_minutes': active_minutes
-})
+df = pd.DataFrame(data)
 
-# Save to CSV
-data.to_csv('data/health_data.csv', index=False)
+# Introduce 5% NaN values randomly in each column
+num_nan = int(0.05 * len(df))
+for column in df.columns[1:]:  # Skip the Date column
+    nan_indices = random.sample(range(len(df)), num_nan)
+    df.loc[nan_indices, column] = np.nan
 
-print("Data generated and saved to health_data.csv")
+# Save to CSV file
+df.to_csv('data/health_data.csv', index=False)
